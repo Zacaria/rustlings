@@ -10,7 +10,7 @@
 //
 // Make the code compile and the tests pass.
 
-// I AM NOT DONE
+// I AM DONE
 
 use std::collections::HashMap;
 
@@ -34,7 +34,25 @@ fn count_for(map: &HashMap<String, Progress>, value: Progress) -> usize {
 fn count_iterator(map: &HashMap<String, Progress>, value: Progress) -> usize {
     // map is a hashmap with String keys and Progress values.
     // map = { "variables1": Complete, "from_str": None, ... }
-    todo!();
+
+    // https://stackoverflow.com/questions/32354947/type-issue-with-iterator-collect
+    //iter() on a vector returns an iterator yielding references into the vector.
+    // cloned() solves the problem because it is an iterator adapter which converts
+    // Iterator<Item=&T> to Iterator<Item=T> if T is cloneable.
+
+    // map.values()
+    //     .into_iter()
+    //     .filter(|&val| -> bool { val == &value })
+    //     .cloned() // doesn't work without cloned
+    //     .map(|val| val)
+    //     .collect::<Vec<Progress>>()
+    //     .len()
+
+    map.iter()
+        .filter(|&(name, &val)| val == value)
+        .map(|(name, val)| (name.clone(), *val))
+        .collect::<HashMap<String, Progress>>()
+        .len()
 }
 
 fn count_collection_for(collection: &[HashMap<String, Progress>], value: Progress) -> usize {
@@ -53,7 +71,11 @@ fn count_collection_iterator(collection: &[HashMap<String, Progress>], value: Pr
     // collection is a slice of hashmaps.
     // collection = [{ "variables1": Complete, "from_str": None, ... },
     //     { "variables2": Complete, ... }, ... ]
-    todo!();
+
+    collection
+        .iter()
+        .map(|item| count_iterator(&item, value))
+        .sum()
 }
 
 #[cfg(test)]
